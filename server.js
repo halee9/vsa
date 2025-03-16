@@ -259,6 +259,52 @@ app.post("/stt", upload.single("audio"), async (req, res) => {
   }
 });
 
+// 서버 상태 체크용 엔드포인트
+app.get("/health", (req, res) => {
+  res.json({
+    status: "ok",
+    timestamp: new Date(),
+    uptime: process.uptime(),
+  });
+});
+
+// 현재 날씨 정보를 가져오는 GET 엔드포인트
+app.get("/weather", async (req, res) => {
+  try {
+    // 쿼리 파라미터로 도시를 받을 수 있음 (기본값: Seattle)
+    const city = req.query.city || "Seattle";
+    const weatherData = await getWeatherData(city);
+
+    if (weatherData) {
+      res.json({
+        city: weatherData.city,
+        temperature: {
+          fahrenheit: Math.round(weatherData.temperatureF),
+          celsius: Math.round(weatherData.temperatureC),
+        },
+        feelsLike: {
+          fahrenheit: Math.round(weatherData.feelsLikeF),
+          celsius: Math.round(weatherData.feelsLikeC),
+        },
+        conditions: weatherData.description,
+        humidity: weatherData.humidity,
+        windSpeed: weatherData.windSpeed,
+      });
+    } else {
+      res.status(404).json({
+        error: "Weather data not found",
+        message: "Unable to fetch weather data for the specified city",
+      });
+    }
+  } catch (error) {
+    console.error("Weather API Error:", error);
+    res.status(500).json({
+      error: "Internal server error",
+      message: "Failed to fetch weather data",
+    });
+  }
+});
+
 // Make sure uploads directory exists
 if (!fs.existsSync("uploads")) {
   fs.mkdirSync("uploads");
