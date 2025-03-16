@@ -25,6 +25,9 @@ if (!OPENAI_API_KEY || !WEATHER_API_KEY) {
 // Multer configuration for file uploads
 const upload = multer({ dest: "uploads/" });
 
+// 서버 URL을 환경변수로 설정
+const SERVER_URL = process.env.SERVER_URL || `http://localhost:${port}`;
+
 // Function to convert Celsius to Fahrenheit
 function celsiusToFahrenheit(celsius) {
   return (celsius * 9) / 5 + 32;
@@ -87,7 +90,7 @@ async function textToSpeech(text) {
     // Save the file
     fs.writeFileSync(filePath, response.data);
 
-    // Return the URL path
+    // Return the URL path with the correct server URL
     return `/audio/${fileName}`;
   } catch (error) {
     console.error("TTS Error:", error);
@@ -184,9 +187,7 @@ async function processTextAndGenerateResponse(text) {
     return {
       transcription: transcribedText,
       response: finalResponse,
-      audioUrl: responseAudioPath
-        ? `http://localhost:${port}${responseAudioPath}`
-        : null,
+      audioUrl: responseAudioPath ? `${SERVER_URL}${responseAudioPath}` : null,
     };
   } catch (error) {
     console.error("Processing Error:", error);
