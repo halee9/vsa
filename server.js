@@ -86,27 +86,107 @@ async function textToSpeech(text) {
     // Generate unique filename
     const fileName = `speech-${Date.now()}.mp3`;
     const filePath = path.join(publicDir, fileName);
+    const audioPath = `/audio/${fileName}`;
 
     // Save the file
     fs.writeFileSync(filePath, response.data);
 
-    // Return the URL path with the correct server URL
-    return `/audio/${fileName}`;
+    // Return the full URL
+    return `${SERVER_URL}${audioPath}`;
   } catch (error) {
     console.error("TTS Error:", error);
     return null;
   }
 }
 
-// Common function to process text and generate response
+// 반려동물 명령어 및 응답 정의
+const PET_COMMANDS = {
+  sit: {
+    variations: ["sit", "sit down", "sitting"],
+    response: "I'm sitting now! *wags tail*",
+    action: "SITTING",
+  },
+  stand: {
+    variations: ["stand", "stand up", "standing", "get up"],
+    response: "I stood up and I'm ready for the next command!",
+    action: "STANDING",
+  },
+  lay: {
+    variations: ["lay", "lay down", "lying down", "lie down"],
+    response: "I'm lying down comfortably now~",
+    action: "LYING",
+  },
+  come: {
+    variations: ["come", "come here", "here"],
+    response: "I'm coming to you right away! *excited*",
+    action: "COMING",
+  },
+  stay: {
+    variations: ["stay", "wait", "don't move"],
+    response: "I'll stay right here until you say otherwise!",
+    action: "STAYING",
+  },
+  paw: {
+    variations: ["paw", "shake", "give me your paw", "hand"],
+    response: "Here's my paw! *extends paw happily*",
+    action: "GIVING_PAW",
+  },
+  roll: {
+    variations: ["roll", "roll over", "rolling"],
+    response: "Rolling over! *rolls happily*",
+    action: "ROLLING",
+  },
+};
+
+// 입력이 명령어인지 확인하는 함수
+function identifyPetCommand(input) {
+  const text = input.toLowerCase().trim();
+
+  // 명령어 확인
+  for (const [command, data] of Object.entries(PET_COMMANDS)) {
+    if (
+      data.variations.some(
+        (variation) =>
+          text === variation ||
+          text.includes(` ${variation} `) ||
+          text.startsWith(`${variation} `) ||
+          text.endsWith(` ${variation}`)
+      )
+    ) {
+      return {
+        isCommand: true,
+        command: command,
+        response: data.response,
+        action: data.action,
+      };
+    }
+  }
+
+  return { isCommand: false };
+}
+
+// processTextAndGenerateResponse 함수 수정
 async function processTextAndGenerateResponse(text) {
   try {
     const transcribedText = text.toLowerCase();
     console.log("Processing Text:", transcribedText);
 
-    let finalResponse;
+    // 먼저 반려동물 명령어인지 확인
+    const commandCheck = identifyPetCommand(transcribedText);
 
-    // Check if the question is about weather
+    if (commandCheck.isCommand) {
+      // 반려동물 명령어인 경우
+      return {
+        transcription: transcribedText,
+        response: commandCheck.response,
+        action: commandCheck.action,
+        audioUrl: await textToSpeech(commandCheck.response),
+        type: "pet_command",
+      };
+    }
+
+    // 날씨 확인 또는 일반 대화 처리 (기존 코드)
+    let finalResponse;
     if (transcribedText.includes("weather")) {
       const weatherData = await getWeatherData();
       if (weatherData) {
@@ -155,6 +235,7 @@ async function processTextAndGenerateResponse(text) {
         finalResponse = "Sorry, I can't get the weather information right now.";
       }
     } else {
+      // ChatGPT 시스템 메시지 수정
       const chatResponse = await axios.post(
         "https://api.openai.com/v1/chat/completions",
         {
@@ -163,7 +244,7 @@ async function processTextAndGenerateResponse(text) {
             {
               role: "system",
               content:
-                "You are a helpful AI assistant. Provide brief and concise responses in 1-2 sentences maximum. Be direct and get straight to the point.",
+                "You are a friendly virtual pet dog. Respond in a cheerful, dog-like manner, but you can also provide helpful information when asked. Keep responses brief and playful. If you're unsure about something, it's okay to say you don't know but would love to learn about it.",
             },
             {
               role: "user",
@@ -181,13 +262,14 @@ async function processTextAndGenerateResponse(text) {
       finalResponse = chatResponse.data.choices[0].message.content;
     }
 
-    // Convert the response to speech
+    // 오디오 변환 및 응답
     const responseAudioPath = await textToSpeech(finalResponse);
 
     return {
       transcription: transcribedText,
       response: finalResponse,
-      audioUrl: responseAudioPath ? `${SERVER_URL}${responseAudioPath}` : null,
+      audioUrl: responseAudioPath,
+      type: "conversation",
     };
   } catch (error) {
     console.error("Processing Error:", error);
