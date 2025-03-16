@@ -320,7 +320,5 @@ if (!fs.existsSync(publicAudioDir)) {
 // Start server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
-  console.log(
-    `Audio files will be available at http://localhost:${port}/audio/`
-  );
+  console.log(`Audio files will be available at ${SERVER_URL}/audio/`);
 });
