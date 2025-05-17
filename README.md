@@ -4,6 +4,30 @@ This API enables your Unity client (e.g. a Meta Quest app) to communicate with a
 
 ---
 
+## 🔐 Authentication
+
+All requests to the API must include a valid API key in the request header.
+
+### Required Header:
+
+```
+x-api-key: YOUR_SECRET_KEY
+```
+
+Set your API key securely in your `.env` file as `VSA_API_KEY` and register it using:
+
+```bash
+fly secrets set VSA_API_KEY=your_secret_key
+```
+
+In Unity, this is how you add the header:
+
+```csharp
+request.SetRequestHeader("x-api-key", "your_secret_key");
+```
+
+---
+
 ## 🧭 Why Use This API?
 
 The Virtual Service Animal API gives your Unity project an intelligent, responsive service animal companion that:
@@ -73,6 +97,8 @@ IEnumerator SendAudioToServer(string filePath)
     form.AddBinaryData("audio", audioData, "voice.wav", "audio/wav");
 
     UnityWebRequest request = UnityWebRequest.Post("https://vsa.fly.dev/speech?userId=ha&skipTTS=false", form);
+    request.SetRequestHeader("x-api-key", "your_secret_key");
+
     yield return request.SendWebRequest();
 
     if (request.result == UnityWebRequest.Result.Success)
@@ -105,6 +131,7 @@ https://vsa.fly.dev/text?userId=ha&skipTTS=false
 
 ```
 Content-Type: application/json
+x-api-key: YOUR_SECRET_KEY
 ```
 
 #### Body (JSON):
@@ -171,6 +198,7 @@ audioSource.Play();
 - 🎯 Use `command` to trigger behaviors in Unity.
 - 🔊 Use `audioUrl` if `skipTTS=false`.
 - 💾 Server stores memory per user to enable conversational continuity.
+- 🔐 All requests require `x-api-key` authentication.
 
 ---
 
