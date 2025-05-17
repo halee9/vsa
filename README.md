@@ -1,6 +1,6 @@
 # 🐾 Virtual Service Animal API – Unity Integration Guide
 
-This API enables your Unity client (e.g. a Meta Quest app) to communicate with a virtual service animal using **text or voice input**. The system supports **intent detection**, **natural dialogue**, and **optional TTS (Text-to-Speech)** audio output.
+This API enables your Unity client (e.g. a Meta Quest app) to communicate with a virtual service animal using **voice or text input**. The system supports **intent detection**, **natural dialogue**, and **optional TTS (Text-to-Speech)** audio output.
 
 ---
 
@@ -43,27 +43,57 @@ https://vsa.fly.dev
 
 ---
 
-## 🎮 Integration Overview
+## 🎙️ Voice Input – `/speech` (Recommended for Unity)
 
-Your Unity app sends either:
-
-- **Text** via HTTP POST to `/text`
-- **Recorded voice** as a `.wav` file via POST to `/speech`
-
-The API returns:
-
-- The **recognized intent**
-- A **command string** (if it’s a pet action like `sit`, `fetch`, etc.)
-- An **LLM-generated response** if it’s general conversation
-- An **audio file URL** (optional, for speaking the response)
-
----
-
-## ✏️ Text Input – `/text`
+This is the **primary interface for Unity clients.** Unity records the user's voice, sends it to the server, and receives a recognized intent and optional audio reply.
 
 ### ✅ Use this when:
 
-- You’re sending typed or STT-converted text from Unity
+- You record audio in Unity and want to send it for STT + intent processing
+
+### Request (POST):
+
+```
+https://vsa.fly.dev/speech?userId=ha&skipTTS=true
+```
+
+#### Body: `multipart/form-data`
+
+| Field Name | Type | Required | Notes                             |
+| ---------- | ---- | -------- | --------------------------------- |
+| `audio`    | File | ✅       | Must be `.wav`, 16kHz recommended |
+
+### 🧪 Sample Unity Upload Code
+
+```csharp
+IEnumerator SendAudioToServer(string filePath)
+{
+    byte[] audioData = File.ReadAllBytes(filePath);
+    WWWForm form = new WWWForm();
+    form.AddBinaryData("audio", audioData, "voice.wav", "audio/wav");
+
+    UnityWebRequest request = UnityWebRequest.Post("https://vsa.fly.dev/speech?userId=ha&skipTTS=false", form);
+    yield return request.SendWebRequest();
+
+    if (request.result == UnityWebRequest.Result.Success)
+    {
+        Debug.Log("Response: " + request.downloadHandler.text);
+        // Parse JSON and handle intent, command, audioUrl etc.
+    }
+    else
+    {
+        Debug.LogError("Error: " + request.error);
+    }
+}
+```
+
+---
+
+## ✏️ Text Input – `/text` (Primarily for API Testing)
+
+This endpoint allows you to send plain text to the API. It's mainly intended for **testing without a Unity client**, such as from Postman or Thunder Client.
+
+In production, `/speech` is typically used.
 
 ### Request (POST):
 
@@ -98,39 +128,6 @@ Content-Type: application/json
   "audioUrl": "https://vsa.fly.dev/tts_output/tts_1747379404687.mp3"
 }
 ```
-
-#### Unity Handling:
-
-```csharp
-if (response.command != null) {
-    TriggerPetBehavior(response.command); // e.g., "sit_dog" → dog.MakeDogSit();
-} else {
-    DisplayDialogue(response.responseText);
-    if (!string.IsNullOrEmpty(response.audioUrl)) {
-        PlayAudioFromUrl(response.audioUrl);
-    }
-}
-```
-
----
-
-## 🎙️ Voice Input – `/speech`
-
-### ✅ Use this when:
-
-- You record audio in Unity and want to send it for STT + intent processing
-
-### Request (POST):
-
-```
-https://vsa.fly.dev/speech?userId=ha&skipTTS=true
-```
-
-#### Body: `multipart/form-data`
-
-| Field Name | Type | Required | Notes                             |
-| ---------- | ---- | -------- | --------------------------------- |
-| `audio`    | File | ✅       | Must be `.wav`, 16kHz recommended |
 
 ---
 
@@ -169,11 +166,11 @@ audioSource.Play();
 
 ## ✅ Summary
 
-- 🎮 Use `/text` for text commands or chat.
-- 🎙️ Use `/speech` to upload `.wav` audio.
-- 🎯 Use `command` for pet actions and `responseText` for conversational replies.
+- 🎙️ Use `/speech` from Unity to send `.wav` audio and receive command/response.
+- ✏️ Use `/text` for Postman or local testing purposes.
+- 🎯 Use `command` to trigger behaviors in Unity.
 - 🔊 Use `audioUrl` if `skipTTS=false`.
-- 💾 Conversations are stored in memory per user.
+- 💾 Server stores memory per user to enable conversational continuity.
 
 ---
 
