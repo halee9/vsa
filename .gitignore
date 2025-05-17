@@ -47,3 +47,5 @@ pids
 # Yarn Integrity file
 .yarn-integrity
 
+memory/
+tts_output/

@@ -1,406 +1,263 @@
-const express = require("express");
-const multer = require("multer");
-const axios = require("axios");
-const fs = require("fs");
-const FormData = require("form-data");
-const path = require("path");
-require("dotenv").config();
+// Voice Command Server with STT (Wit.ai), LLM (ChatGPT), and TTS (OpenAI)
+// Refactored into functional modules for readability and maintainability
+
+import express from "express";
+import multer from "multer";
+import axios from "axios";
+import fs from "fs";
+import path from "path";
+import "dotenv/config";
 
 const app = express();
-const port = process.env.PORT || 3000;
-
-// Add static file serving for audio files
-app.use("/audio", express.static(path.join(__dirname, "public", "audio")));
-
-// 환경변수에서 API 키 가져오기
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const WEATHER_API_KEY = process.env.WEATHER_API_KEY;
-
-// API 키 존재 여부 확인
-if (!OPENAI_API_KEY || !WEATHER_API_KEY) {
-  console.error("Missing required API keys in environment variables");
-  process.exit(1);
-}
-
-// Multer configuration for file uploads
+const port = 3000;
 const upload = multer({ dest: "uploads/" });
+const memoryDir = "./memory";
+const ttsDir = "./tts_output";
+if (!fs.existsSync(memoryDir)) fs.mkdirSync(memoryDir);
+if (!fs.existsSync(ttsDir)) fs.mkdirSync(ttsDir);
 
-// 서버 URL을 환경변수로 설정
-const SERVER_URL = process.env.SERVER_URL || `http://localhost:${port}`;
+app.use("/tts_output", express.static("tts_output"));
+app.use(express.json()); // to parse JSON body
 
-// Function to convert Celsius to Fahrenheit
-function celsiusToFahrenheit(celsius) {
-  return (celsius * 9) / 5 + 32;
-}
+function handleIntent(intent, text) {
+  const response = {
+    command: null,
+    category: null,
+    action: null,
+    description: "",
+  };
 
-// Function to get weather data
-async function getWeatherData(city = "Seattle") {
-  try {
-    const response = await axios.get(
-      `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${WEATHER_API_KEY}`
-    );
-    const tempC = response.data.main.temp;
-    const feelsLikeC = response.data.main.feels_like;
-
-    return {
-      temperatureC: tempC,
-      temperatureF: celsiusToFahrenheit(tempC),
-      feelsLikeC: feelsLikeC,
-      feelsLikeF: celsiusToFahrenheit(feelsLikeC),
-      description: response.data.weather[0].description,
-      humidity: response.data.main.humidity,
-      windSpeed: response.data.wind.speed,
-      city: response.data.name,
-    };
-  } catch (error) {
-    console.error("Weather API Error:", error);
-    return null;
+  switch (intent) {
+    case "sit_dog":
+    case "stop_dog":
+    case "walk_dog":
+      response.command = intent;
+      response.category = "movement";
+      response.action = intent.replace("_dog", "");
+      response.description = `Perform action: ${response.action}`;
+      break;
+    case "wag_tail":
+      response.command = "wag_tail";
+      response.category = "reaction";
+      response.action = "wag";
+      response.description = "Dog wags its tail";
+      break;
+    case "dog_comfort":
+    case "dog_angry":
+    case "dog_eat":
+      response.command = intent;
+      response.category = "emotion";
+      response.action = intent.split("_")[1];
+      response.description = `Emotional response: ${response.action}`;
+      break;
+    case "math_game":
+    case "math_game_setup":
+    case "correct_math_answer":
+    case "incorrect_math_answer":
+    case "try_previous_math_problem":
+    case "end_math_section":
+      response.command = intent;
+      response.category = "math_game";
+      response.action = intent;
+      response.description = `Math game intent: ${intent}`;
+      break;
+    case "throw_ball":
+    case "fetch_object":
+    case "get_ball":
+      response.command = "fetch";
+      response.category = "play";
+      response.action = intent;
+      response.description = "Play interaction command";
+      break;
+    case "move_forward":
+    case "move_backward":
+    case "move_left":
+    case "move_right":
+      response.command = "move";
+      response.category = "navigation";
+      response.action = intent.split("_")[1];
+      response.description = `Move in direction: ${response.action}`;
+      break;
+    default:
+      response.command = null;
+      response.category = "unknown";
+      response.action = null;
+      response.description = `Unrecognized intent: ${intent}`;
+      break;
   }
+  return response;
 }
 
-// Function to convert text to speech using OpenAI TTS
-async function textToSpeech(text) {
-  try {
-    const response = await axios.post(
-      "https://api.openai.com/v1/audio/speech",
-      {
-        model: "tts-1",
-        voice: "alloy",
-        input: text,
+async function transcribeWithWit(audioPath) {
+  const audioStream = fs.createReadStream(audioPath);
+  const response = await axios.post(
+    "https://api.wit.ai/speech?v=20230228",
+    audioStream,
+    {
+      headers: {
+        Authorization: `Bearer ${process.env.WIT_AI_TOKEN}`,
+        "Content-Type": "audio/wav",
+        "Transfer-Encoding": "chunked",
       },
-      {
-        headers: {
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        responseType: "arraybuffer",
-      }
-    );
-
-    // Create a public directory for audio files if it doesn't exist
-    const publicDir = path.join(__dirname, "public", "audio");
-    if (!fs.existsSync(publicDir)) {
-      fs.mkdirSync(publicDir, { recursive: true });
     }
-
-    // Generate unique filename
-    const fileName = `speech-${Date.now()}.mp3`;
-    const filePath = path.join(publicDir, fileName);
-    const audioPath = `/audio/${fileName}`;
-
-    // Save the file
-    fs.writeFileSync(filePath, response.data);
-
-    // Return the full URL
-    return `${SERVER_URL}${audioPath}`;
-  } catch (error) {
-    console.error("TTS Error:", error);
-    return null;
-  }
+  );
+  const text = response.data._text || "";
+  const intent = response.data.intents?.[0]?.name || "unknown";
+  return { text, intent };
 }
 
-// 반려동물 명령어 및 응답 정의
-const PET_COMMANDS = {
-  sit: {
-    variations: ["sit", "sit down", "sitting"],
-    response: "I'm sitting now! *wags tail*",
-    action: "SITTING",
-  },
-  stand: {
-    variations: ["stand", "stand up", "standing", "get up"],
-    response: "I stood up and I'm ready for the next command!",
-    action: "STANDING",
-  },
-  lay: {
-    variations: ["lay", "lay down", "lying down", "lie down"],
-    response: "I'm lying down comfortably now~",
-    action: "LYING",
-  },
-  come: {
-    variations: ["come", "come here", "here"],
-    response: "I'm coming to you right away! *excited*",
-    action: "COMING",
-  },
-  stay: {
-    variations: ["stay", "wait", "don't move"],
-    response: "I'll stay right here until you say otherwise!",
-    action: "STAYING",
-  },
-  paw: {
-    variations: ["paw", "shake", "give me your paw", "hand"],
-    response: "Here's my paw! *extends paw happily*",
-    action: "GIVING_PAW",
-  },
-  roll: {
-    variations: ["roll", "roll over", "rolling"],
-    response: "Rolling over! *rolls happily*",
-    action: "ROLLING",
-  },
-};
-
-// 입력이 명령어인지 확인하는 함수
-function identifyPetCommand(input) {
-  const text = input.toLowerCase().trim();
-
-  // 명령어 확인
-  for (const [command, data] of Object.entries(PET_COMMANDS)) {
-    if (
-      data.variations.some(
-        (variation) =>
-          text === variation ||
-          text.includes(` ${variation} `) ||
-          text.startsWith(`${variation} `) ||
-          text.endsWith(` ${variation}`)
-      )
-    ) {
-      return {
-        isCommand: true,
-        command: command,
-        response: data.response,
-        action: data.action,
-      };
-    }
-  }
-
-  return { isCommand: false };
-}
-
-// processTextAndGenerateResponse 함수 수정
-async function processTextAndGenerateResponse(text) {
-  try {
-    const transcribedText = text.toLowerCase();
-    console.log("Processing Text:", transcribedText);
-
-    // 먼저 반려동물 명령어인지 확인
-    const commandCheck = identifyPetCommand(transcribedText);
-
-    if (commandCheck.isCommand) {
-      // 반려동물 명령어인 경우
-      return {
-        transcription: transcribedText,
-        response: commandCheck.response,
-        action: commandCheck.action,
-        audioUrl: await textToSpeech(commandCheck.response),
-        type: "pet_command",
-      };
-    }
-
-    // 날씨 확인 또는 일반 대화 처리 (기존 코드)
-    let finalResponse;
-    if (transcribedText.includes("weather")) {
-      const weatherData = await getWeatherData();
-      if (weatherData) {
-        const weatherContext = `Current weather information for ${
-          weatherData.city
-        }:
-          - Temperature: ${weatherData.temperatureF.toFixed(
-            1
-          )}°F (${weatherData.temperatureC.toFixed(1)}°C)
-          - Feels like: ${weatherData.feelsLikeF.toFixed(
-            1
-          )}°F (${weatherData.feelsLikeC.toFixed(1)}°C)
-          - Conditions: ${weatherData.description}
-          - Humidity: ${weatherData.humidity}%
-          - Wind Speed: ${weatherData.windSpeed} m/s`;
-
-        const chatResponse = await axios.post(
-          "https://api.openai.com/v1/chat/completions",
-          {
-            model: "gpt-3.5-turbo",
-            messages: [
-              {
-                role: "system",
-                content:
-                  "You are a helpful and friendly AI assistant. Provide brief and concise responses in 1-2 sentences. When discussing weather, be conversational but keep it short and to the point. Use Fahrenheit as the primary temperature unit.",
-              },
-              {
-                role: "user",
-                content: transcribedText,
-              },
-              {
-                role: "assistant",
-                content: weatherContext,
-              },
-            ],
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${OPENAI_API_KEY}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        finalResponse = chatResponse.data.choices[0].message.content;
-      } else {
-        finalResponse = "Sorry, I can't get the weather information right now.";
-      }
-    } else {
-      // ChatGPT 시스템 메시지 수정
-      const chatResponse = await axios.post(
-        "https://api.openai.com/v1/chat/completions",
-        {
-          model: "gpt-3.5-turbo",
-          messages: [
-            {
-              role: "system",
-              content:
-                "You are a friendly virtual pet dog. Respond in a cheerful, dog-like manner, but you can also provide helpful information when asked. Keep responses brief and playful. If you're unsure about something, it's okay to say you don't know but would love to learn about it.",
-            },
-            {
-              role: "user",
-              content: transcribedText,
-            },
-          ],
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${OPENAI_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      finalResponse = chatResponse.data.choices[0].message.content;
-    }
-
-    // 오디오 변환 및 응답
-    const responseAudioPath = await textToSpeech(finalResponse);
-
-    return {
-      transcription: transcribedText,
-      response: finalResponse,
-      audioUrl: responseAudioPath,
-      type: "conversation",
-    };
-  } catch (error) {
-    console.error("Processing Error:", error);
-    throw error;
-  }
-}
-
-// Endpoint for text input
-app.post("/chat", express.json(), async (req, res) => {
-  try {
-    const { text } = req.body;
-
-    if (!text) {
-      return res.status(400).json({ error: "No text provided" });
-    }
-
-    const result = await processTextAndGenerateResponse(text);
-    res.json(result);
-  } catch (error) {
-    console.error("Chat Error:", error);
-    res.status(500).json({
-      error: "Failed to process request",
-      details: error.response?.data,
-    });
-  }
-});
-
-// Modified speech-to-text endpoint
-app.post("/stt", upload.single("audio"), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ error: "No audio file uploaded" });
-    }
-
-    console.log("Uploaded file details:", req.file);
-
-    const uploadedAudioPath = req.file.path;
-    const formData = new FormData();
-
-    formData.append("file", fs.createReadStream(uploadedAudioPath), {
-      filename: req.file.originalname,
-      contentType: req.file.mimetype,
-    });
-    formData.append("model", "whisper-1");
-
-    // Convert speech to text
-    const sttResponse = await axios.post(
-      "https://api.openai.com/v1/audio/transcriptions",
-      formData,
-      {
-        headers: {
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
-          ...formData.getHeaders(),
-        },
-      }
-    );
-
-    // Clean up the uploaded audio file
-    fs.unlinkSync(uploadedAudioPath);
-
-    // Process the transcribed text
-    const result = await processTextAndGenerateResponse(sttResponse.data.text);
-    res.json(result);
-  } catch (error) {
-    console.error("STT Error:", error);
-    res.status(500).json({
-      error: "Failed to process request",
-      details: error.response?.data,
-    });
-  }
-});
-
-// 서버 상태 체크용 엔드포인트
-app.get("/health", (req, res) => {
-  res.json({
-    status: "ok",
-    timestamp: new Date(),
-    uptime: process.uptime(),
+async function analyzeTextIntent(inputText) {
+  const res = await axios.get("https://api.wit.ai/message", {
+    params: { v: "20230228", q: inputText },
+    headers: {
+      Authorization: `Bearer ${process.env.WIT_AI_TOKEN}`,
+    },
   });
-});
+  const intent = res.data.intents?.[0]?.name || "unknown";
+  return intent;
+}
 
-// 현재 날씨 정보를 가져오는 GET 엔드포인트
-app.get("/weather", async (req, res) => {
-  try {
-    // 쿼리 파라미터로 도시를 받을 수 있음 (기본값: Seattle)
-    const city = req.query.city || "Seattle";
-    const weatherData = await getWeatherData(city);
+function loadUserMemory(userId) {
+  const memoryPath = path.join(memoryDir, `${userId}.json`);
+  if (fs.existsSync(memoryPath)) {
+    return JSON.parse(fs.readFileSync(memoryPath));
+  }
+  return { history: [] };
+}
 
-    if (weatherData) {
-      res.json({
-        city: weatherData.city,
-        temperature: {
-          fahrenheit: Math.round(weatherData.temperatureF),
-          celsius: Math.round(weatherData.temperatureC),
-        },
-        feelsLike: {
-          fahrenheit: Math.round(weatherData.feelsLikeF),
-          celsius: Math.round(weatherData.feelsLikeC),
-        },
-        conditions: weatherData.description,
-        humidity: weatherData.humidity,
-        windSpeed: weatherData.windSpeed,
-      });
-    } else {
-      res.status(404).json({
-        error: "Weather data not found",
-        message: "Unable to fetch weather data for the specified city",
-      });
+function saveUserMemory(userId, memory) {
+  const memoryPath = path.join(memoryDir, `${userId}.json`);
+  fs.writeFileSync(memoryPath, JSON.stringify(memory, null, 2));
+}
+
+async function generateResponse(text, memory) {
+  const prompt =
+    `You are Buddy, a friendly service animal. Conversation history:\n` +
+    memory.history
+      .slice(-3)
+      .map((h) => `- ${h}`)
+      .join("\n") +
+    `\nNow the user says: ${text}`;
+
+  const gptRes = await axios.post(
+    "https://api.openai.com/v1/chat/completions",
+    {
+      model: "gpt-3.5-turbo",
+      messages: [{ role: "user", content: prompt }],
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        "Content-Type": "application/json",
+      },
     }
-  } catch (error) {
-    console.error("Weather API Error:", error);
-    res.status(500).json({
-      error: "Internal server error",
-      message: "Failed to fetch weather data",
-    });
+  );
+
+  return gptRes.data.choices[0].message.content;
+}
+
+async function synthesizeSpeech(text) {
+  const res = await axios.post(
+    "https://api.openai.com/v1/audio/speech",
+    {
+      model: "tts-1",
+      voice: "nova",
+      input: text,
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      responseType: "arraybuffer",
+    }
+  );
+
+  const audioFilename = `tts_${Date.now()}.mp3`;
+  const audioFilePath = path.join(ttsDir, audioFilename);
+  fs.writeFileSync(audioFilePath, res.data);
+
+  return `/tts_output/${audioFilename}`;
+}
+
+app.post("/speech", upload.single("audio"), async (req, res) => {
+  const userId = req.query.userId || "default";
+  const skipTTS = req.query.skipTTS === "true";
+  const audioPath = req.file.path;
+
+  try {
+    const { text, intent } = await transcribeWithWit(audioPath);
+    const intentInfo = handleIntent(intent, text);
+    const memory = loadUserMemory(userId);
+
+    let finalText = text;
+    if (!intentInfo.command) {
+      finalText = await generateResponse(text, memory);
+    }
+
+    memory.history.push(text);
+    if (memory.history.length > 10) memory.history.shift();
+    saveUserMemory(userId, memory);
+
+    const response = {
+      originalText: text,
+      intent,
+      ...intentInfo,
+      responseText: finalText,
+    };
+
+    if (!skipTTS && !intentInfo.command) {
+      const audioUrl = await synthesizeSpeech(finalText);
+      response.audioUrl = `http://localhost:${port}${audioUrl}`;
+    }
+
+    res.json(response);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
+  } finally {
+    fs.unlinkSync(audioPath);
   }
 });
 
-// Make sure uploads directory exists
-if (!fs.existsSync("uploads")) {
-  fs.mkdirSync("uploads");
-}
+app.post("/text", async (req, res) => {
+  const userId = req.query.userId || "default";
+  const skipTTS = req.query.skipTTS === "true";
+  const { inputText } = req.body;
 
-// Make sure public/audio directory exists
-const publicAudioDir = path.join(__dirname, "public", "audio");
-if (!fs.existsSync(publicAudioDir)) {
-  fs.mkdirSync(publicAudioDir, { recursive: true });
-}
+  try {
+    const intent = await analyzeTextIntent(inputText);
+    const intentInfo = handleIntent(intent, inputText);
+    const memory = loadUserMemory(userId);
 
-// Start server
+    let finalText = inputText;
+    if (!intentInfo.command) {
+      finalText = await generateResponse(inputText, memory);
+    }
+
+    memory.history.push(inputText);
+    if (memory.history.length > 10) memory.history.shift();
+    saveUserMemory(userId, memory);
+
+    const response = {
+      originalText: inputText,
+      intent,
+      ...intentInfo,
+      responseText: finalText,
+    };
+
+    if (!skipTTS && !intentInfo.command) {
+      const audioUrl = await synthesizeSpeech(finalText);
+      response.audioUrl = `http://localhost:${port}${audioUrl}`;
+    }
+
+    res.json(response);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
+  }
+});
+
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-  console.log(`Audio files will be available at ${SERVER_URL}/audio/`);
+  console.log(`🚀 Server running at http://localhost:${port}`);
 });
