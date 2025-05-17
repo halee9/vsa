@@ -14,12 +14,6 @@ All requests to the API must include a valid API key in the request header.
 x-api-key: YOUR_SECRET_KEY
 ```
 
-Set your API key securely in your `.env` file as `VSA_API_KEY` and register it using:
-
-```bash
-fly secrets set VSA_API_KEY=your_secret_key
-```
-
 In Unity, this is how you add the header:
 
 ```csharp
