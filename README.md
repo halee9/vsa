@@ -79,19 +79,14 @@ This is the **primary interface for Unity clients.** Unity records the user's vo
 https://vsa.fly.dev/speech
 ```
 
-#### Query Parameters:
-
-| Parameter | Type    | Default | Description                |
-| --------- | ------- | ------- | -------------------------- |
-| `userId`  | string  | default | User identifier for memory |
-| `mode`    | string  | pet     | Current interaction mode   |
-| `skipTTS` | boolean | false   | Skip audio response        |
-
 #### Body: `multipart/form-data`
 
-| Field Name | Type | Required | Notes                             |
-| ---------- | ---- | -------- | --------------------------------- |
-| `audio`    | File | ✅       | Must be `.wav`, 16kHz recommended |
+| Field Name | Type   | Required | Description                                     |
+| ---------- | ------ | -------- | ----------------------------------------------- |
+| `audio`    | File   | ✅       | Must be `.wav`, 16kHz recommended               |
+| `userId`   | string | ❌       | User identifier for memory (default: "default") |
+| `mode`     | string | ❌       | Current interaction mode (default: "pet")       |
+| `skipTTS`  | string | ❌       | Skip audio response (default: "false")          |
 
 ---
 
