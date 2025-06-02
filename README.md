@@ -4,13 +4,13 @@ This API enables your Unity client (e.g. a Meta Quest app) to communicate with a
 
 ## 📦 Unity Client Integration
 
-Unity 클라이언트 통합을 위한 코드는 `unity-client` 폴더에 있습니다. 자세한 내용은 [Unity Client README](unity-client/README.md)를 참조하세요.
+The Unity client integration code is located in the `unity-client` folder. For details, see the [Unity Client README](unity-client/README.md).
 
 ### Quick Start
 
-1. `unity-client/Scripts` 폴더의 C# 스크립트를 Unity 프로젝트로 복사
-2. API 키와 서버 URL 설정
-3. `ServerVoiceCommandHandler` 컴포넌트를 사용하여 음성 명령 처리
+1. Copy the C# script from the `unity-client/Scripts` folder into your Unity project.
+2. Set your API key and server URL.
+3. Use the `ServerVoiceCommandHandler` component to handle voice commands.
 
 ---
 
