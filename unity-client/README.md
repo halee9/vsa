@@ -4,7 +4,7 @@ This folder contains the Unity client code for integrating with the Virtual Serv
 
 ## 📦 Installation
 
-1. Copy only the `ServerVoiceCommandHandler.cs` script from the `Scripts` folder into your Unity project's `Assets` folder.
+1. Copy only the `ServerVoiceCommandHandler.cs` script from the `Scripts` folder into your Unity project's `Assets/Bublisher/3D Stylized Animated Dogs Kit/Scripts` folder.
 
 ## 🎮 Usage
 
