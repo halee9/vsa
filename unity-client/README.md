@@ -4,12 +4,11 @@ This folder contains the Unity client code for integrating with the Virtual Serv
 
 ## 📦 Installation
 
-1. Copy all C# scripts from the `Scripts` folder into your Unity project's `Assets` folder.
-2. Use only the `ServerVoiceCommandHandler.cs` script. **Do not use the old `WitVoiceCommandHandler.cs` script.**
+1. Copy only the `ServerVoiceCommandHandler.cs` script from the `Scripts` folder into your Unity project's `Assets` folder.
 
 ## 🎮 Usage
 
-1. In your Unity scene, create an empty GameObject (e.g., `WitVoiceCommandManager`).
+1. In your Unity scene, use the existing `WitVoiceCommandManager` GameObject.
 2. Attach the `ServerVoiceCommandHandler` script to this GameObject.
 3. Assign the required objects in the Inspector:
 
@@ -19,9 +18,9 @@ This folder contains the Unity client code for integrating with the Virtual Serv
    - **Curry Plate**: Assign the curry plate object.
    - **Server Url**: Set to `https://vsa.fly.dev/speech`
    - **Api Key**: Enter your API key.
-   - **Stopping Distance From Player**: Set as needed (e.g., 0.2).
+   - **Stopping Distance From Player**: Set as needed (e.g., 2).
 
-4. **Disable or remove** the old `WitVoiceCommandHandler` script if present.
+4. **Disable or uncheck** the old `WitVoiceCommandHandler` script if present.
 
 ## 🖼️ Example Inspector Setup
 
