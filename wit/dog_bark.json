@@ -1,0 +1,62 @@
+[
+  {
+    "text": "bark",
+    "intent": "dog_bark",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "can you bark",
+    "intent": "dog_bark",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "bark loudly",
+    "intent": "dog_bark",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "show me your bark",
+    "intent": "dog_bark",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "give me a bark",
+    "intent": "dog_bark",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "start barking",
+    "intent": "dog_bark",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "go bark",
+    "intent": "dog_bark",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "please bark",
+    "intent": "dog_bark",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "can I hear your bark",
+    "intent": "dog_bark",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "I want to hear you bark",
+    "intent": "dog_bark",
+    "entities": [],
+    "traits": []
+  }
+]

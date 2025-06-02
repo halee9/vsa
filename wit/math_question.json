@@ -1,0 +1,62 @@
+[
+  {
+    "text": "what is one plus one",
+    "intent": "math_question",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "how much is three minus two",
+    "intent": "math_question",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "can you tell me four times five",
+    "intent": "math_question",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "what do you get when you add six and seven",
+    "intent": "math_question",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "what is nine divided by three",
+    "intent": "math_question",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "calculate eight plus two",
+    "intent": "math_question",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "how much is five times four",
+    "intent": "math_question",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "tell me the answer to seven minus one",
+    "intent": "math_question",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "what's the result of two plus two",
+    "intent": "math_question",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "can you solve three plus three",
+    "intent": "math_question",
+    "entities": [],
+    "traits": []
+  }
+]

@@ -1,0 +1,62 @@
+[
+  {
+    "text": "jump",
+    "intent": "dog_jump",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "can you jump",
+    "intent": "dog_jump",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "do a jump",
+    "intent": "dog_jump",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "please jump",
+    "intent": "dog_jump",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "let's jump",
+    "intent": "dog_jump",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "I want to see you jump",
+    "intent": "dog_jump",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "hop up",
+    "intent": "dog_jump",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "jump high",
+    "intent": "dog_jump",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "jump now",
+    "intent": "dog_jump",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "give me a jump",
+    "intent": "dog_jump",
+    "entities": [],
+    "traits": []
+  }
+]

@@ -1,0 +1,62 @@
+[
+  {
+    "text": "follow me",
+    "intent": "dog_follow",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "come follow me",
+    "intent": "dog_follow",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "I want you to follow me",
+    "intent": "dog_follow",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "can you follow me",
+    "intent": "dog_follow",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "please follow me",
+    "intent": "dog_follow",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "come after me",
+    "intent": "dog_follow",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "stay with me",
+    "intent": "dog_follow",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "walk with me",
+    "intent": "dog_follow",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "tag along",
+    "intent": "dog_follow",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "let's go together",
+    "intent": "dog_follow",
+    "entities": [],
+    "traits": []
+  }
+]

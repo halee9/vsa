@@ -1,0 +1,74 @@
+[
+  {
+    "text": "That's enough for now",
+    "intent": "math_game_end",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "Let's stop here",
+    "intent": "math_game_end",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "I'm done with the math",
+    "intent": "math_game_end",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "End the math game",
+    "intent": "math_game_end",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "Stop the quiz",
+    "intent": "math_game_end",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "No more questions",
+    "intent": "math_game_end",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "I'm finished",
+    "intent": "math_game_end",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "That's it for now",
+    "intent": "math_game_end",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "Let's take a break",
+    "intent": "math_game_end",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "We're done",
+    "intent": "math_game_end",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "Let's stop the math",
+    "intent": "math_game_end",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "Quit the math section",
+    "intent": "math_game_end",
+    "entities": [],
+    "traits": []
+  }
+]

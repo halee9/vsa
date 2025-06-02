@@ -1,0 +1,62 @@
+[
+  {
+    "text": "come here",
+    "intent": "dog_come_here",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "come to me",
+    "intent": "dog_come_here",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "get over here",
+    "intent": "dog_come_here",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "come on",
+    "intent": "dog_come_here",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "come closer",
+    "intent": "dog_come_here",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "come this way",
+    "intent": "dog_come_here",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "I want you to come here",
+    "intent": "dog_come_here",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "can you come here",
+    "intent": "dog_come_here",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "please come to me",
+    "intent": "dog_come_here",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "walk over here",
+    "intent": "dog_come_here",
+    "entities": [],
+    "traits": []
+  }
+]

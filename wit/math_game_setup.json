@@ -1,0 +1,74 @@
+[
+  {
+    "text": "let's play a math game",
+    "intent": "math_game_setup",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "start math game",
+    "intent": "math_game_setup",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "can we do some math?",
+    "intent": "math_game_setup",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "begin the math challenge",
+    "intent": "math_game_setup",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "I want to play math quiz",
+    "intent": "math_game_setup",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "launch math game",
+    "intent": "math_game_setup",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "let's do a math puzzle",
+    "intent": "math_game_setup",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "give me some math problems",
+    "intent": "math_game_setup",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "initiate math game",
+    "intent": "math_game_setup",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "start the numbers game",
+    "intent": "math_game_setup",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "I'm ready for math",
+    "intent": "math_game_setup",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "start math activity",
+    "intent": "math_game_setup",
+    "entities": [],
+    "traits": []
+  }
+]

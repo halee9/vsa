@@ -1,6 +1,6 @@
 # 🐾 Virtual Service Animal API – Unity Integration Guide
 
-This API enables your Unity client (e.g. a Meta Quest app) to communicate with a virtual service animal using **voice or text input**. The system supports **intent detection**, **natural dialogue**, and **optional TTS (Text-to-Speech)** audio output.
+This API enables your Unity client (e.g. a Meta Quest app) to communicate with a virtual service animal using **voice or text input**. The system supports **multiple interaction modes**, **intent detection**, **natural dialogue**, and **optional TTS (Text-to-Speech)** audio output.
 
 ---
 
@@ -22,34 +22,42 @@ request.SetRequestHeader("x-api-key", "your_secret_key");
 
 ---
 
-## 🧭 Why Use This API?
+## 🎮 Interaction Modes
 
-The Virtual Service Animal API gives your Unity project an intelligent, responsive service animal companion that:
+The service animal operates in three distinct modes:
 
-- 🐶 Understands basic **pet commands** like `sit`, `fetch`, `come here`, etc.
-- 🧠 Responds to **conversational speech** using ChatGPT (LLM) when the input is not a command
-- 🔊 Provides **text-to-speech** audio responses (optional)
-- 🧾 **Remembers past conversations** per user via server-side memory
+| Mode           | Description                         | Example Intents                        |
+| -------------- | ----------------------------------- | -------------------------------------- |
+| 🐕 `pet`       | Default mode for basic pet commands | `sit_dog`, `fetch_object`, `come_here` |
+| 🧮 `math_game` | Interactive math game mode          | `start_math_game`, `end_math_game`     |
+| 💬 `chat`      | Natural conversation mode           | `start_chat`, `end_chat`               |
 
-### Behavior Overview:
+### Mode Transitions:
 
-| Scenario                       | API Behavior                                                                               |
-| ------------------------------ | ------------------------------------------------------------------------------------------ |
-| 🎙️ Voice says "Sit down"       | Recognized as intent `sit_dog`, response includes `command = sit_dog`, no audio if skipped |
-| 💬 User says "Tell me a story" | No pet command detected → routed to LLM → returns story text + optional TTS                |
-
-This makes the animal behave like an intelligent NPC (non-playable character) that can **follow commands and also talk** when needed.
+- From `pet` mode: Can transition to `chat` or `math_game`
+- From `chat` mode: Returns to `pet` mode on `end_chat`
+- From `math_game` mode: Returns to `pet` mode on `end_math_game`
 
 ---
 
-## ✨ Key Features
+## 🧭 Key Features
 
-- ✅ Easy HTTP integration (text or audio input)
-- 🧠 Wit.ai-powered intent analysis
-- 🤖 ChatGPT (GPT-3.5 Turbo) used for free-form responses
-- 🗣️ Optional OpenAI TTS for spoken replies
-- 📚 Per-user memory history stored server-side
-- 🦴 Designed for real-time, immersive VR/AR interactions
+The Virtual Service Animal API provides:
+
+- 🐶 **Multiple Interaction Modes**: Pet commands, math games, and natural conversation
+- 🧠 **Smart Responses**: Uses ChatGPT for natural, friendly dialogue
+- 🔊 **Voice Support**: Optional TTS responses with OpenAI's Nova voice
+- 💾 **Memory System**: Maintains conversation history per user
+- 🎯 **Intent Detection**: Powered by Wit.ai for command recognition
+- 🤝 **Friendly Personality**: Designed to be a companion, not just a service provider
+
+### Behavior Examples:
+
+| Mode         | Input             | Response                       |
+| ------------ | ----------------- | ------------------------------ |
+| 🐕 Pet       | "Sit down"        | Performs sit action            |
+| 🧮 Math Game | "Let's play math" | Transitions to math game mode  |
+| 💬 Chat      | "How are you?"    | Natural, friendly conversation |
 
 ---
 
@@ -65,15 +73,19 @@ https://vsa.fly.dev
 
 This is the **primary interface for Unity clients.** Unity records the user's voice, sends it to the server, and receives a recognized intent and optional audio reply.
 
-### ✅ Use this when:
-
-- You record audio in Unity and want to send it for STT + intent processing
-
 ### Request (POST):
 
 ```
-https://vsa.fly.dev/speech?userId=ha&skipTTS=true
+https://vsa.fly.dev/speech?userId=ha&mode=pet&skipTTS=false
 ```
+
+#### Query Parameters:
+
+| Parameter | Type    | Default | Description                |
+| --------- | ------- | ------- | -------------------------- |
+| `userId`  | string  | default | User identifier for memory |
+| `mode`    | string  | pet     | Current interaction mode   |
+| `skipTTS` | boolean | false   | Skip audio response        |
 
 #### Body: `multipart/form-data`
 
@@ -90,15 +102,18 @@ IEnumerator SendAudioToServer(string filePath)
     WWWForm form = new WWWForm();
     form.AddBinaryData("audio", audioData, "voice.wav", "audio/wav");
 
-    UnityWebRequest request = UnityWebRequest.Post("https://vsa.fly.dev/speech?userId=ha&skipTTS=false", form);
+    UnityWebRequest request = UnityWebRequest.Post(
+        "https://vsa.fly.dev/speech?userId=ha&mode=pet&skipTTS=false",
+        form
+    );
     request.SetRequestHeader("x-api-key", "your_secret_key");
 
     yield return request.SendWebRequest();
 
     if (request.result == UnityWebRequest.Result.Success)
     {
-        Debug.Log("Response: " + request.downloadHandler.text);
-        // Parse JSON and handle intent, command, audioUrl etc.
+        var response = JsonUtility.FromJson<APIResponse>(request.downloadHandler.text);
+        // Handle response.intent, response.action, response.audioUrl etc.
     }
     else
     {
@@ -109,16 +124,14 @@ IEnumerator SendAudioToServer(string filePath)
 
 ---
 
-## ✏️ Text Input – `/text` (Primarily for API Testing)
+## ✏️ Text Input – `/text` (For Testing)
 
-This endpoint allows you to send plain text to the API. It's mainly intended for **testing without a Unity client**, such as from Postman or Thunder Client.
-
-In production, `/speech` is typically used.
+Use this endpoint for testing without Unity. In production, use `/speech`.
 
 ### Request (POST):
 
 ```
-https://vsa.fly.dev/text?userId=ha&skipTTS=false
+https://vsa.fly.dev/text?userId=ha&mode=pet&skipTTS=false
 ```
 
 #### Headers:
@@ -140,59 +153,71 @@ x-api-key: YOUR_SECRET_KEY
 
 ```json
 {
-  "originalText": "Can you sit down?",
+  "inputText": "Can you sit down?",
   "intent": "sit_dog",
-  "command": "sit_dog",
-  "category": "movement",
   "action": "sit",
-  "responseText": "Can you sit down?",
-  "audioUrl": "https://vsa.fly.dev/tts_output/tts_1747379404687.mp3"
+  "responseText": "Sure, I'll sit down!",
+  "audioUrl": "https://vsa.fly.dev/tts_output/tts_1747379404687.mp3",
+  "nextMode": "pet"
 }
 ```
 
 ---
 
-## 🧠 Intent Types
+## 🧠 Intent Types by Mode
 
-| Intent Example | Meaning               | Action                 |
-| -------------- | --------------------- | ---------------------- |
-| `sit_dog`      | “Sit down”            | Pet sits               |
-| `fetch_object` | “Get the ball”        | Pet fetches ball       |
-| `dog_comfort`  | “I’m feeling sad”     | Pet reacts emotionally |
-| `unknown`      | No clear intent found | Use LLM response       |
+### Pet Mode Intents
 
----
+| Intent         | Example        | Action         |
+| -------------- | -------------- | -------------- |
+| `sit_dog`      | "Sit down"     | Pet sits       |
+| `fetch_object` | "Get the ball" | Pet fetches    |
+| `come_here`    | "Come here"    | Pet approaches |
 
-## 🛠 Query Parameters Explained
+### Math Game Mode Intents
 
-| Parameter | Type    | Default | Description                         |
-| --------- | ------- | ------- | ----------------------------------- |
-| `userId`  | string  | default | Keeps conversation history separate |
-| `skipTTS` | boolean | false   | If true, `audioUrl` is not returned |
+| Intent            | Example           | Action     |
+| ----------------- | ----------------- | ---------- |
+| `start_math_game` | "Let's play math" | Start game |
+| `end_math_game`   | "Stop playing"    | End game   |
+
+### Chat Mode Intents
+
+| Intent       | Example      | Action     |
+| ------------ | ------------ | ---------- |
+| `start_chat` | "Let's talk" | Start chat |
+| `end_chat`   | "Goodbye"    | End chat   |
 
 ---
 
 ## 🔊 Unity Audio Playback Example
 
 ```csharp
-UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(audioUrl, AudioType.MPEG);
-yield return www.SendWebRequest();
+IEnumerator PlayAudioResponse(string audioUrl)
+{
+    UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(audioUrl, AudioType.MPEG);
+    yield return www.SendWebRequest();
 
-AudioClip clip = DownloadHandlerAudioClip.GetContent(www);
-audioSource.clip = clip;
-audioSource.Play();
+    if (www.result == UnityWebRequest.Result.Success)
+    {
+        AudioClip clip = DownloadHandlerAudioClip.GetContent(www);
+        audioSource.clip = clip;
+        audioSource.Play();
+    }
+}
 ```
 
 ---
 
 ## ✅ Summary
 
-- 🎙️ Use `/speech` from Unity to send `.wav` audio and receive command/response.
-- ✏️ Use `/text` for Postman or local testing purposes.
-- 🎯 Use `command` to trigger behaviors in Unity.
-- 🔊 Use `audioUrl` if `skipTTS=false`.
-- 💾 Server stores memory per user to enable conversational continuity.
-- 🔐 All requests require `x-api-key` authentication.
+- 🎮 Three interaction modes: pet, math game, and chat
+- 🎙️ Use `/speech` for voice input in Unity
+- ✏️ Use `/text` for testing
+- 🧠 Intent-based actions with natural language processing
+- 💬 Friendly, conversational responses
+- 💾 Per-user memory for context awareness
+- 🔐 API key authentication required
 
 ---
 

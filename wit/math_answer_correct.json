@@ -1,0 +1,74 @@
+[
+  {
+    "text": "That's right, it's two",
+    "intent": "math_answer_correct",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "Correct, it's three",
+    "intent": "math_answer_correct",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "Yes, exactly, five",
+    "intent": "math_answer_correct",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "You're right, it's six",
+    "intent": "math_answer_correct",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "It is seven, great work",
+    "intent": "math_answer_correct",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "That's it, eight",
+    "intent": "math_answer_correct",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "Nine, right answer",
+    "intent": "math_answer_correct",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "Ten, good boy",
+    "intent": "math_answer_correct",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "Eleven, perfect",
+    "intent": "math_answer_correct",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "You nailed it, it's twelve",
+    "intent": "math_answer_correct",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "Exactly, thirteen",
+    "intent": "math_answer_correct",
+    "entities": [],
+    "traits": []
+  },
+  {
+    "text": "That's correct, fourteen",
+    "intent": "math_answer_correct",
+    "entities": [],
+    "traits": []
+  }
+]
