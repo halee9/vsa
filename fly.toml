@@ -7,6 +7,8 @@ app = 'vsa'
 primary_region = 'sea'
 
 [build]
+  builder = "node:20"
+  buildCommand = "npm install && npm run build"
 
 [http_service]
   internal_port = 3000
