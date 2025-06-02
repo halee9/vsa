@@ -7,8 +7,7 @@ app = 'vsa'
 primary_region = 'sea'
 
 [build]
-  builder = "node:20"
-  buildCommand = "npm install && npm run build"
+  dockerfile = "Dockerfile"
 
 [http_service]
   internal_port = 3000
