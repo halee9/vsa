@@ -26,11 +26,11 @@ request.SetRequestHeader("x-api-key", "your_secret_key");
 
 The service animal operates in three distinct modes:
 
-| Mode           | Description                         | Example Intents                        |
-| -------------- | ----------------------------------- | -------------------------------------- |
-| 🐕 `pet`       | Default mode for basic pet commands | `sit_dog`, `fetch_object`, `come_here` |
-| 🧮 `math_game` | Interactive math game mode          | `start_math_game`, `end_math_game`     |
-| 💬 `chat`      | Natural conversation mode           | `start_chat`, `end_chat`               |
+| Mode           | Description                         | Example Intents                    |
+| -------------- | ----------------------------------- | ---------------------------------- |
+| 🐕 `pet`       | Default mode for basic pet commands | `sit`, `fetch`, `come_here`        |
+| 🧮 `math_game` | Interactive math game mode          | `start_math_game`, `end_math_game` |
+| 💬 `chat`      | Natural conversation mode           | `start_chat`, `end_chat`           |
 
 ### Mode Transitions:
 
@@ -69,14 +69,14 @@ https://vsa.fly.dev
 
 ---
 
-## 🎙️ Voice Input – `/speech` (Recommended for Unity)
+## 🎙️ Voice Input – `/speech`
 
 This is the **primary interface for Unity clients.** Unity records the user's voice, sends it to the server, and receives a recognized intent and optional audio reply.
 
 ### Request (POST):
 
 ```
-https://vsa.fly.dev/speech?userId=ha&mode=pet&skipTTS=false
+https://vsa.fly.dev/speech
 ```
 
 #### Query Parameters:
@@ -93,86 +93,17 @@ https://vsa.fly.dev/speech?userId=ha&mode=pet&skipTTS=false
 | ---------- | ---- | -------- | --------------------------------- |
 | `audio`    | File | ✅       | Must be `.wav`, 16kHz recommended |
 
-### 🧪 Sample Unity Upload Code
-
-```csharp
-IEnumerator SendAudioToServer(string filePath)
-{
-    byte[] audioData = File.ReadAllBytes(filePath);
-    WWWForm form = new WWWForm();
-    form.AddBinaryData("audio", audioData, "voice.wav", "audio/wav");
-
-    UnityWebRequest request = UnityWebRequest.Post(
-        "https://vsa.fly.dev/speech?userId=ha&mode=pet&skipTTS=false",
-        form
-    );
-    request.SetRequestHeader("x-api-key", "your_secret_key");
-
-    yield return request.SendWebRequest();
-
-    if (request.result == UnityWebRequest.Result.Success)
-    {
-        var response = JsonUtility.FromJson<APIResponse>(request.downloadHandler.text);
-        // Handle response.intent, response.action, response.audioUrl etc.
-    }
-    else
-    {
-        Debug.LogError("Error: " + request.error);
-    }
-}
-```
-
----
-
-## ✏️ Text Input – `/text` (For Testing)
-
-Use this endpoint for testing without Unity. In production, use `/speech`.
-
-### Request (POST):
-
-```
-https://vsa.fly.dev/text?userId=ha&mode=pet&skipTTS=false
-```
-
-#### Headers:
-
-```
-Content-Type: application/json
-x-api-key: YOUR_SECRET_KEY
-```
-
-#### Body (JSON):
-
-```json
-{
-  "inputText": "Can you sit down?"
-}
-```
-
-### 🔁 Response:
-
-```json
-{
-  "inputText": "Can you sit down?",
-  "intent": "sit_dog",
-  "action": "sit",
-  "responseText": "Sure, I'll sit down!",
-  "audioUrl": "https://vsa.fly.dev/tts_output/tts_1747379404687.mp3",
-  "nextMode": "pet"
-}
-```
-
 ---
 
 ## 🧠 Intent Types by Mode
 
 ### Pet Mode Intents
 
-| Intent         | Example        | Action         |
-| -------------- | -------------- | -------------- |
-| `sit_dog`      | "Sit down"     | Pet sits       |
-| `fetch_object` | "Get the ball" | Pet fetches    |
-| `come_here`    | "Come here"    | Pet approaches |
+| Intent      | Example        | Action         |
+| ----------- | -------------- | -------------- |
+| `sit`       | "Sit down"     | Pet sits       |
+| `fetch`     | "Get the ball" | Pet fetches    |
+| `come_here` | "Come here"    | Pet approaches |
 
 ### Math Game Mode Intents
 
@@ -190,35 +121,11 @@ x-api-key: YOUR_SECRET_KEY
 
 ---
 
-## 🔊 Unity Audio Playback Example
-
-```csharp
-IEnumerator PlayAudioResponse(string audioUrl)
-{
-    UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(audioUrl, AudioType.MPEG);
-    yield return www.SendWebRequest();
-
-    if (www.result == UnityWebRequest.Result.Success)
-    {
-        AudioClip clip = DownloadHandlerAudioClip.GetContent(www);
-        audioSource.clip = clip;
-        audioSource.Play();
-    }
-}
-```
-
----
-
 ## ✅ Summary
 
 - 🎮 Three interaction modes: pet, math game, and chat
 - 🎙️ Use `/speech` for voice input in Unity
-- ✏️ Use `/text` for testing
 - 🧠 Intent-based actions with natural language processing
 - 💬 Friendly, conversational responses
 - 💾 Per-user memory for context awareness
 - 🔐 API key authentication required
-
----
-
-For any issues or questions, please contact the API maintainer or refer to the in-code comments for Unity integration logic.
