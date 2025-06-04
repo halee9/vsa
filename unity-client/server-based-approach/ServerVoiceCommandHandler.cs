@@ -10,7 +10,7 @@ public class ServerVoiceCommandHandler : MonoBehaviour
     public Transform tennisBall;               // Reference to the tennis ball object
     public Transform curryPlate;               // Reference to the curry plate object
     public string serverUrl = "https://vsa.fly.dev/speech?userId=testuser"; // Server endpoint
-    public string apiKey = "BellevueCollegeCapstoneVSA";     // API key for server authentication
+    public string apiKey = "Your API Key";     // API key for server authentication
     public float stoppingDistanceFromPlayer = 0.2f; // Dog stop distance from player
 
     private AudioClip recording;               // Microphone recording clip

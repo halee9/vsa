@@ -2,33 +2,32 @@
 
 This folder contains the Unity client code for integrating with the Virtual Service Animal API.
 
-## 📦 Installation
+## 📦 Overview
 
-1. Copy only the `ServerVoiceCommandHandler.cs` script from the `Scripts` folder into your Unity project's `Assets/Bublisher/3D Stylized Animated Dogs Kit/Scripts` folder.
+We offer two different approaches for handling voice commands:
 
-## 🎮 Usage
+1. **Server-based approach**:
 
-1. In your Unity scene, use the existing `WitVoiceCommandManager` GameObject.
-2. Attach the `ServerVoiceCommandHandler` script to this GameObject.
-3. Assign the required objects in the Inspector:
+   - The Unity client sends audio data to a Node.js server (`server.js`).
+   - The server handles:
+     - Speech-to-text using Wit.ai
+     - Intent detection and LLM response generation using ChatGPT
+     - Text-to-speech (TTS) synthesis
+   - This keeps the Unity client lightweight and shifts most of the processing to the backend.
 
-   - **Dog**: Assign your dog movement object.
-   - **Player**: Assign the player (e.g., Main Camera).
-   - **Tennis Ball**: Assign the tennis ball object.
-   - **Curry Plate**: Assign the curry plate object.
-   - **Server Url**: Set to `https://vsa.fly.dev/speech`
-   - **Api Key**: Enter your API key.
-   - **Stopping Distance From Player**: Set as needed (e.g., 2).
+2. **Client-based approach**:
+   - The Unity client directly handles the entire pipeline:
+     - Sends audio to Wit.ai for STT
+     - Sends the transcribed text to ChatGPT for a response
+     - Converts the response to audio using a TTS API
+   - This removes the need for a backend server but requires more logic and API management inside Unity.
 
-4. **Disable or uncheck** the old `WitVoiceCommandHandler` script if present.
+## 📚 Usage
 
-## 🖼️ Example Inspector Setup
+For detailed instructions on how to use each approach, please refer to the following README files:
 
-Below is an example of how your GameObject should look in the Unity Inspector:
-
-![Inspector Example](inspector_example.png)
-
-> _If you update or replace the screenshot, keep the file name as `inspector_example.png`._
+- **Server-based approach**: [Server README](server-based-approach/README.md)
+- **Client-based approach**: [Client README](client-based-approach/README.md)
 
 ## 📝 Key Features
 
@@ -40,7 +39,6 @@ Below is an example of how your GameObject should look in the Unity Inspector:
 ## 🐛 Troubleshooting
 
 - Make sure your API key and server URL are set correctly.
-- Only use `ServerVoiceCommandHandler.cs` (disable any old scripts).
 - Check your audio and object assignments in the Inspector.
 
 ## 📚 API Documentation
