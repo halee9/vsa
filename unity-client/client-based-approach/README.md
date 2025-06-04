@@ -10,14 +10,15 @@ This folder contains the client-side implementation for handling voice commands 
 
 ## 🚀 Usage
 
-1. In your Unity scene, attach the `ClientVoiceCommandHandler` script to a GameObject.
-2. Configure the script in the Inspector:
+1. In your Unity scene, select the existing `WitVoiceCommandManager` GameObject (which already has the `WitVoiceCommandHandler` component).
+2. Add the `ChatHandler` and `TTSManager` components to this GameObject in the Inspector.
+3. In the Inspector, enter the required keys:
 
-   - **Wit.ai API Key**: Enter your Wit.ai API key.
-   - **ChatGPT API Key**: Enter your ChatGPT API key.
-   - **TTS API Key**: Enter your TTS API key.
+   - **Wit.ai API Key** (in `WitVoiceCommandHandler`)
+   - **OpenRouter API Key** (in `ChatHandler`)
+   - **OpenAI Key** (in `TTSManager`)
 
-3. The client will handle the entire pipeline:
+4. The client will handle the entire pipeline:
    - Sends audio to Wit.ai for STT
    - Sends the transcribed text to ChatGPT for a response
    - Converts the response to audio using a TTS API
